@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pocetna strana</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script>
+		$(function() {
+			$('#komentar').on('submit', function(e) {
+				e.preventDefault();
+				var komentar = $('[name="sadrzaj"]').val();
+				
+				var ths = $(this); // da bi moglo da se pristupi iz ajax-a
 
+				$.ajax({
+					'method':'post',
+					'url':'logika/ostavikomentar.php',
+					'data':{
+						'sadrzaj':komentar
+					},
+					'success':function(odgovor) {
+						console.log(odgovor);
+						var o = JSON.parse(odgovor);
+						ths.after(
+						'<hr>'+
+						'<form action="logika/obrisikomentar.php" method="post">' +
+						'<button name="komentar_id" value="' + o.komentar_id + '">Obrisi</button>			</form>' +
+						'<div>' +
+							'<h3>' + o.vreme + '</h3>' +
+							'<h4>' + o.email + '</h4>' +
+							'<pre>' + komentar + '</pre>' +
+						'</div>'
+						);
+						$('[name="sadrzaj"]').val('');
+					}
+				});
+			});
+		});
+	</script>
+</head>
+<body>
+	<a href="logika/logout.php">Odjavi se</a>
+	<form action="logika/ostavikomentar.php"
+			id="komentar"
+			method="post">
+		<textarea name="sadrzaj"
+			placeholder="Unesi komentar"></textarea>
+		<br>
+		<input type="submit"
+				value="Posalji komentar">
+	</form>
+	<hr>
+	<?php foreach($komentari as $komentar): ?>
+		<div>
+	<!-- <h3><?php echo $komentar->vreme ?></h3> -->
+			<form action="logika/obrisikomentar.php"
+					method="post">
+				<button name="komentar_id"
+						value="<?= $komentar->id ?>">
+					Obrisi
+				</button>
+			</form>
+			<h3><?= $komentar->vreme() ?></h3>
+			<h4><?= Korisnik::vrati_za_id($komentar->korisnik_id)->email ?></h4>
+			<pre><?= $komentar->sadrzaj ?></pre>
+		</div>
+		<hr>
+	<?php endforeach ?>
+</body>
+</html>
